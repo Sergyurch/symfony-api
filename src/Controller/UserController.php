@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,7 +36,7 @@ class UserController extends AbstractController
             $user->setSurname($request->get('surname'));
             $user->setPersonalCode($request->get('personal_code'));
             $user->setPhoneNumber($request->get('phone_number'));
-            $user->setDateOfBirth($request->get('date_of_birth'));
+            $user->setDateOfBirth(date_create($request->get('date_of_birth')));
             $entityManager->persist($user);
             $entityManager->flush();
 
@@ -58,7 +59,7 @@ class UserController extends AbstractController
     public function getOneUser(UserRepository $userRepository, $id): JsonResponse
     {
         $user = $userRepository->find($id);
-
+        
         if (!$user) {
             $data = [
                 'status' => 404,
@@ -67,12 +68,12 @@ class UserController extends AbstractController
             return $this->response($data, 404);
         }
 
-        return $this->response($user);
+        return $this->response([$user]);
     }
 
     #[Route('/users/{id}', name: 'users_put', methods: ['PUT'])]
-    public function updateUser(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, $id){
-
+    public function updateUser(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, $id): JsonResponse
+    {
         try {
             $user = $userRepository->find($id);
 
@@ -91,12 +92,12 @@ class UserController extends AbstractController
                 throw new \Exception();
             }
 
-            $user = new User();
             $user->setName($request->get('name'));
             $user->setSurname($request->get('surname'));
             $user->setPersonalCode($request->get('personal_code'));
             $user->setPhoneNumber($request->get('phone_number'));
-            $user->setDateOfBirth($request->get('date_of_birth'));
+            $user->setDateOfBirth(date_create($request->get('date_of_birth')));
+            $entityManager->persist($user);
             $entityManager->flush();
 
             $data = [
@@ -130,7 +131,7 @@ class UserController extends AbstractController
         $entityManager->flush();
         $data = [
             'status' => 200,
-            'errors' => "User deleted successfully",
+            'success' => "User deleted successfully",
         ];
         return $this->response($data);
     }

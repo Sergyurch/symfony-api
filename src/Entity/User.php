@@ -7,7 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -92,5 +92,16 @@ class User
         $this->date_of_birth = $date_of_birth;
 
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            "name" => $this->getName(),
+            "surname" => $this->getSurname(),
+            "personal_code" => $this->getPersonalCode(),
+            "phone_number" => $this->getPhoneNumber(),
+            "date_of_birth" => $this->getDateOfBirth()->format('Y-m-d')
+        ];
     }
 }
