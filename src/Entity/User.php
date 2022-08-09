@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -28,6 +30,14 @@ class User implements \JsonSerializable
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_of_birth = null;
+
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: BankAccount::class, orphanRemoval: true)]
+    private Collection $bankAccounts;
+
+    public function __construct()
+    {
+        $this->bankAccounts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,5 +113,35 @@ class User implements \JsonSerializable
             "phone_number" => $this->getPhoneNumber(),
             "date_of_birth" => $this->getDateOfBirth()->format('Y-m-d')
         ];
+    }
+
+    /**
+     * @return Collection<int, BankAccount>
+     */
+    public function getBankAccounts(): Collection
+    {
+        return $this->bankAccounts;
+    }
+
+    public function addBankAccount(BankAccount $bankAccount): self
+    {
+        if (!$this->bankAccounts->contains($bankAccount)) {
+            $this->bankAccounts->add($bankAccount);
+            $bankAccount->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBankAccount(BankAccount $bankAccount): self
+    {
+        if ($this->bankAccounts->removeElement($bankAccount)) {
+            // set the owning side to null (unless already changed)
+            if ($bankAccount->getClient() === $this) {
+                $bankAccount->setClient(null);
+            }
+        }
+
+        return $this;
     }
 }
