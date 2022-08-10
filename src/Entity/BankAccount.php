@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BankAccountRepository::class)]
-class BankAccount
+class BankAccount implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -37,7 +37,6 @@ class BankAccount
 
     public function __construct()
     {
-        $this->transfers = new ArrayCollection();
         $this->transfers_from = new ArrayCollection();
         $this->transfers_to = new ArrayCollection();
     }
@@ -93,6 +92,16 @@ class BankAccount
         $this->created_at = $created_at;
 
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            "iban" => $this->getIban(),
+            "balance" => $this->getBalance(),
+            "client" => $this->getClient(),
+            "created_at" => $this->getCreatedAt()->format('Y-m-d')
+        ];
     }
 
     /**

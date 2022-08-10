@@ -44,6 +44,7 @@ class UserController extends AbstractController
                 'status' => 200,
                 'success' => "User added successfully",
             ];
+
             return $this->response($data);
 
         } catch (\Exception $e) {
@@ -51,6 +52,7 @@ class UserController extends AbstractController
                 'status' => 422,
                 'errors' => "Data no valid",
             ];
+
             return $this->response($data, 422);
         }
     }
@@ -65,6 +67,7 @@ class UserController extends AbstractController
                 'status' => 404,
                 'errors' => "User not found",
             ];
+
             return $this->response($data, 404);
         }
 
@@ -82,6 +85,7 @@ class UserController extends AbstractController
                     'status' => 404,
                     'errors' => "User not found",
                 ];
+
                 return $this->response($data, 404);
             }
 
@@ -104,6 +108,7 @@ class UserController extends AbstractController
                 'status' => 200,
                 'success' => "User updated successfully",
             ];
+
             return $this->response($data);
 
         } catch (\Exception $e) {
@@ -111,6 +116,7 @@ class UserController extends AbstractController
                 'status' => 422,
                 'errors' => "Data no valid",
             ];
+
             return $this->response($data, 422);
         }
     }
@@ -124,6 +130,7 @@ class UserController extends AbstractController
                 'status' => 404,
                 'errors' => "User not found",
             ];
+
             return $this->response($data, 404);
         }
 
@@ -133,6 +140,7 @@ class UserController extends AbstractController
             'status' => 200,
             'success' => "User deleted successfully",
         ];
+        
         return $this->response($data);
     }
 
