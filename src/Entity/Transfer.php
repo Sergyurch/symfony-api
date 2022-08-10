@@ -7,7 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TransferRepository::class)]
-class Transfer
+class Transfer implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -79,5 +79,15 @@ class Transfer
         $this->created_at = $created_at;
 
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            "from_account" => $this->getFromAccount(),
+            "to_account" => $this->getToAccount(),
+            "amount" => $this->getAmount(),
+            "created_at" => $this->getCreatedAt()
+        ];
     }
 }
