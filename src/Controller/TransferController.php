@@ -27,8 +27,7 @@ class TransferController extends AbstractController
         try {
             $request = $this->transformJsonBody($request);
 
-            if (!$request || !$request->get('from_account') || !$request->get('to_account') || !$request->get('amount') || 
-                !$request->get('created_at')) {
+            if (!$request || !$request->get('from_account') || !$request->get('to_account') || !$request->get('amount') ) {
                 throw new \Exception();
             }
 
@@ -36,7 +35,8 @@ class TransferController extends AbstractController
             $transfer->setFromAccount($bankAccountRepository->find($request->get('from_account')));
             $transfer->setToAccount($bankAccountRepository->find($request->get('to_account')));
             $transfer->setAmount($request->get('amount'));
-            $transfer->setCreatedAt(date_create($request->get('created_at')));
+            $transfer->setCreatedAt(date_create());
+            $transfer->setUpdatedAt(date_create());
             $entityManager->persist($transfer);
             $entityManager->flush();
 
@@ -91,15 +91,14 @@ class TransferController extends AbstractController
 
             $request = $this->transformJsonBody($request);
 
-            if (!$request || !$request->get('from_account') || !$request->get('to_account') || !$request->get('amount') || 
-                !$request->get('created_at')) {
+            if (!$request || !$request->get('from_account') || !$request->get('to_account') || !$request->get('amount')) {
                 throw new \Exception();
             }
 
             $transfer->setFromAccount($bankAccountRepository->find($request->get('from_account')));
             $transfer->setToAccount($bankAccountRepository->find($request->get('to_account')));
             $transfer->setAmount($request->get('amount'));
-            $transfer->setCreatedAt(date_create($request->get('created_at')));
+            $transfer->setUpdatedAt(date_create());
             $entityManager->persist($transfer);
             $entityManager->flush();
 

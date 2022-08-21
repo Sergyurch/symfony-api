@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api', name: 'api_')]
@@ -21,13 +22,14 @@ class UserController extends AbstractController
     }
 
     #[Route('/users', name: 'users_add', methods: ['POST'])]
-    public function addUser(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function addUser(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         try {
             $request = $this->transformJsonBody($request);
 
             if (!$request || !$request->get('name') || !$request->get('surname') || !$request->get('personal_code') || 
-                !$request->get('phone_number') || !$request->get('date_of_birth')) {
+                !$request->get('phone_number') || !$request->get('date_of_birth') ||
+                !$request->get('email') || !$request->get('password')) {
                 throw new \Exception();
             }
 
@@ -36,7 +38,15 @@ class UserController extends AbstractController
             $user->setSurname($request->get('surname'));
             $user->setPersonalCode($request->get('personal_code'));
             $user->setPhoneNumber($request->get('phone_number'));
-            $user->setDateOfBirth(date_create($request->get('date_of_birth')));
+            $user->setDateOfBirth($request->get('date_of_birth'));
+            $user->setEmail($request->get('email'));
+            $hashedPassword = $passwordHasher->hashPassword(
+                $user,
+                $request->get('password')
+            );
+            $user->setPassword($hashedPassword);
+            $user->setCreatedAt(date_create());
+            $user->setUpdatedAt(date_create());
             $entityManager->persist($user);
             $entityManager->flush();
 
@@ -51,6 +61,7 @@ class UserController extends AbstractController
             $data = [
                 'status' => 422,
                 'errors' => "Data no valid",
+                'e' => $e->getMessage(),
             ];
 
             return $this->response($data, 422);
@@ -90,17 +101,15 @@ class UserController extends AbstractController
             }
 
             $request = $this->transformJsonBody($request);
+            
+            if (!$request) throw new \Exception();
 
-            if (!$request || !$request->get('name') || !$request->get('surname') || !$request->get('personal_code') || 
-                !$request->get('phone_number') || !$request->get('date_of_birth')) {
-                throw new \Exception();
+            foreach($request->request->all() as $key => $value) {
+                $method = $this->getMethod($key);
+                $user->$method($value);
             }
 
-            $user->setName($request->get('name'));
-            $user->setSurname($request->get('surname'));
-            $user->setPersonalCode($request->get('personal_code'));
-            $user->setPhoneNumber($request->get('phone_number'));
-            $user->setDateOfBirth(date_create($request->get('date_of_birth')));
+            $user->setUpdatedAt(date_create());
             $entityManager->persist($user);
             $entityManager->flush();
 
@@ -122,7 +131,8 @@ class UserController extends AbstractController
     }
 
     #[Route('/users/{id}', name: 'users_delete', methods: ['DELETE'])]
-    public function deleteUser(EntityManagerInterface $entityManager, UserRepository $userRepository, $id){
+    public function deleteUser(EntityManagerInterface $entityManager, UserRepository $userRepository, $id)
+    {
         $user = $userRepository->find($id);
 
         if (!$user){
@@ -160,5 +170,16 @@ class UserController extends AbstractController
         $request->request->replace($data);
 
         return $request;
+    }
+
+    protected function getMethod(string $string)
+    {
+        $arr = explode('_', $string);
+
+        array_walk($arr, function ($element) {
+            $element = ucfirst($element);
+        });
+
+        return 'set' . implode('', $arr);
     }
 }

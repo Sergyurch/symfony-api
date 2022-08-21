@@ -26,8 +26,11 @@ class BankAccount implements \JsonSerializable
     #[ORM\JoinColumn(nullable: false)]
     private ?User $client = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $created_at = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\OneToMany(mappedBy: 'from_account', targetEntity: Transfer::class, orphanRemoval: true)]
     private Collection $transfers_from;
@@ -94,13 +97,26 @@ class BankAccount implements \JsonSerializable
         return $this;
     }
 
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    {
+        $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
     public function jsonSerialize()
     {
         return [
             "iban" => $this->getIban(),
             "balance" => $this->getBalance(),
             "client" => $this->getClient(),
-            "created_at" => $this->getCreatedAt()->format('Y-m-d')
+            "created_at" => $this->getCreatedAt(),
+            "updated_at" => $this->getUpdatedAt(),
         ];
     }
 

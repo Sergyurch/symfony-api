@@ -28,6 +28,9 @@ class Transfer implements \JsonSerializable
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $created_at = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $updated_at = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -81,13 +84,26 @@ class Transfer implements \JsonSerializable
         return $this;
     }
 
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    {
+        $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
     public function jsonSerialize()
     {
         return [
             "from_account" => $this->getFromAccount(),
             "to_account" => $this->getToAccount(),
             "amount" => $this->getAmount(),
-            "created_at" => $this->getCreatedAt()
+            "created_at" => $this->getCreatedAt(),
+            "updated_at" => $this->getUpdatedAt()
         ];
     }
 }

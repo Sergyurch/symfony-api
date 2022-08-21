@@ -27,8 +27,7 @@ class BankAccountController extends AbstractController
         try {
             $request = $this->transformJsonBody($request);
 
-            if (!$request || !$request->get('iban') || !$request->get('balance') || !$request->get('client') || 
-                !$request->get('created_at')) {
+            if (!$request || !$request->get('iban') || !$request->get('balance') || !$request->get('client')) {
                 throw new \Exception();
             }
 
@@ -36,7 +35,8 @@ class BankAccountController extends AbstractController
             $bankAccount->setIban($request->get('iban'));
             $bankAccount->setBalance($request->get('balance'));
             $bankAccount->setClient($userRepository->find($request->get('client')));
-            $bankAccount->setCreatedAt(date_create($request->get('created_at')));
+            $bankAccount->setCreatedAt(date_create());
+            $bankAccount->setUpdatedAt(date_create());
             $entityManager->persist($bankAccount);
             $entityManager->flush();
 
@@ -51,6 +51,7 @@ class BankAccountController extends AbstractController
             $data = [
                 'status' => 422,
                 'errors' => "Data no valid",
+                'error' => $e->getMessage()
             ];
 
             return $this->response($data, 422);
@@ -91,15 +92,14 @@ class BankAccountController extends AbstractController
 
             $request = $this->transformJsonBody($request);
 
-            if (!$request || !$request->get('iban') || !$request->get('balance') || !$request->get('client') || 
-                !$request->get('created_at')) {
+            if (!$request || !$request->get('iban') || !$request->get('balance') || !$request->get('client')) {
                 throw new \Exception();
             }
 
             $bankAccount->setIban($request->get('iban'));
             $bankAccount->setBalance($request->get('balance'));
             $bankAccount->setClient($userRepository->find($request->get('client')));
-            $bankAccount->setCreatedAt(date_create($request->get('created_at')));
+            $bankAccount->setUpdatedAt(date_create());
             $entityManager->persist($bankAccount);
             $entityManager->flush();
 
