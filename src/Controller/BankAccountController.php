@@ -31,6 +31,10 @@ class BankAccountController extends AbstractController
                 throw new \Exception();
             }
 
+            if ( strpos(strrev($request->get('balance')), ".") > 2) {
+                throw new \Exception('Wrong balance format');
+            }
+
             $bankAccount = new BankAccount();
             $bankAccount->setIban($request->get('iban'));
             $bankAccount->setBalance($request->get('balance'));

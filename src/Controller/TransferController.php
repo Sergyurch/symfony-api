@@ -31,13 +31,34 @@ class TransferController extends AbstractController
                 throw new \Exception();
             }
 
+            if ( strpos(strrev($request->get('amount')), ".") > 2) {
+                throw new \Exception('Wrong balance format');
+            }
+            
+            $fromBankAccount = $bankAccountRepository->find($request->get('from_account'));
+            $newBalance = $fromBankAccount->getBalance() - $request->get('amount');
+            
+            if ($newBalance < 0) {
+                throw new \Exception('Not enough money');
+            }
+                     
+            $fromBankAccount->setBalance($newBalance);
+            $fromBankAccount->setUpdatedAt(date_create());
+            $entityManager->persist($fromBankAccount);
+
+            $toBankAccount = $bankAccountRepository->find($request->get('to_account'));
+            $toBankAccount->setBalance($toBankAccount->getBalance() + $request->get('amount'));
+            $toBankAccount->setUpdatedAt(date_create());
+            $entityManager->persist($toBankAccount);
+
             $transfer = new Transfer();
-            $transfer->setFromAccount($bankAccountRepository->find($request->get('from_account')));
-            $transfer->setToAccount($bankAccountRepository->find($request->get('to_account')));
+            $transfer->setFromAccount($fromBankAccount);
+            $transfer->setToAccount($toBankAccount);
             $transfer->setAmount($request->get('amount'));
             $transfer->setCreatedAt(date_create());
             $transfer->setUpdatedAt(date_create());
             $entityManager->persist($transfer);
+
             $entityManager->flush();
 
             $data = [
@@ -51,6 +72,7 @@ class TransferController extends AbstractController
             $data = [
                 'status' => 422,
                 'errors' => "Data no valid",
+                'message' => $e->getMessage(),
             ];
 
             return $this->response($data, 422);
@@ -74,7 +96,7 @@ class TransferController extends AbstractController
         return $this->response([$transfer]);
     }
 
-    #[Route('/transfers/{id}', name: 'transfers_put', methods: ['PUT'])]
+    /*#[Route('/transfers/{id}', name: 'transfers_put', methods: ['PUT'])]
     public function updateTransfer(Request $request, EntityManagerInterface $entityManager, TransferRepository $transferRepository, BankAccountRepository $bankAccountRepository, $id): JsonResponse
     {
         try {
@@ -140,7 +162,7 @@ class TransferController extends AbstractController
         ];
         
         return $this->response($data);
-    }
+    }*/
 
     protected function response(array $data, $status = 200, array $headers = []): JsonResponse
     {
