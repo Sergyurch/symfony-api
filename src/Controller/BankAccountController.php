@@ -31,9 +31,7 @@ class BankAccountController extends AbstractController
                 throw new \Exception();
             }
 
-            $balanceToCheck = $request->get('balance') * 100;
-                        
-            if ($balanceToCheck != floor($balanceToCheck)) {
+            if ( strpos(strrev($request->get('balance')), ".") > 2) {
                 throw new \Exception('Wrong balance format');
             }
 

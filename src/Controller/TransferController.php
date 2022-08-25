@@ -31,10 +31,8 @@ class TransferController extends AbstractController
                 throw new \Exception();
             }
 
-            $amountToCheck = $request->get('amount') * 100;
-                        
-            if ($amountToCheck != floor($amountToCheck)) {
-                throw new \Exception('Wrong amount format');
+            if ( strpos(strrev($request->get('amount')), ".") > 2) {
+                throw new \Exception('Wrong balance format');
             }
             
             $fromBankAccount = $bankAccountRepository->find($request->get('from_account'));
